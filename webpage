@@ -1,0 +1,6 @@
+home-auto-esp-mqtt/
+├─ firmware/            # Arduino Cloud sketch and configs
+├─ server/              # express backend
+└─ web/                 # React frontend
+
+
