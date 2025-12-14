@@ -21,16 +21,21 @@ function App() {
     return () => client.end();
   }, []);
 
-  const sendControl = async (state) => {
+    const sendControl = async (state) => {
     try {
-      await fetch('/api/control', {  // Calls backend API
+      const response = await fetch('/api/control', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ state }),
       });
-      console.log(`Sent ${state}`);
+      if (!response.ok) {
+        console.error('Control API error:', response.status);
+      } else {
+        console.log(`Sent ${state} successfully`);
+      }
     } catch (error) {
-      console.error('Error sending control:', error);
+      console.error('Error sending control (normal during load):', error);
+      // Don't crash the app!
     }
   };
 
