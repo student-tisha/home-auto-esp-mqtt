@@ -6,7 +6,7 @@ exports.handler = async (event) => {
   const { state } = JSON.parse(event.body || '{}');
   if (!['ON', 'OFF'].includes(state)) return { statusCode: 400, body: 'Invalid state' };
 
-  const client = mqtt.connect('tcp://broker.hivemq.com:1883');
+ const client = mqtt.connect('tcp://broker.emqx.io:1883');
 
   return new Promise((resolve) => {
     client.on('connect', () => {

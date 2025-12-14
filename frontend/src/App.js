@@ -9,7 +9,7 @@ function App() {
   useEffect(() => {
     let client;
     try {
-    client = mqtt.connect('wss://broker.hivemq.com:8000/mqtt');     
+    client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');     
       client.on('connect', () => {
         setConnectionStatus('Connected! Waiting for data...');
         client.subscribe('homeauto/tisha123/data');  // ← CHANGE TO YOUR UNIQUE ID
