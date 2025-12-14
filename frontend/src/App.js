@@ -9,7 +9,7 @@ function App() {
   useEffect(() => {
     let client;
     try {
-      client = mqtt.connect('ws://broker.hivemq.com:8000/mqtt');
+     client = mqtt.connect('wss://broker.hivemq.com:8000/mqtt');
       
       client.on('connect', () => {
         setConnectionStatus('Connected! Waiting for data...');
