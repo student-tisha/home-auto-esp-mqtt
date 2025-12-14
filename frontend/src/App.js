@@ -5,15 +5,17 @@ function App() {
   const [temperature, setTemperature] = useState('Loading...');
   const [humidity, setHumidity] = useState('Loading...');
   const [connectionStatus, setConnectionStatus] = useState('Connecting to sensor...');
+    const [mqttClient, setMqttClient] = useState(null);
 
   useEffect(() => {
     let client;
     try {
     client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');     
       client.on('connect', () => {
-        setConnectionStatus('Connected! Waiting for data...');
-        client.subscribe('homeauto/tisha123/data');  // ← CHANGE TO YOUR UNIQUE ID
-      });
+  setConnectionStatus('Connected! Waiting for data...');
+  setMqttClient(client);  // ← ADD THIS LINE
+  client.subscribe('homeauto/tisha123/data');
+});
 
       client.on('message', (topic, message) => {
         if (topic === 'homeauto/tisha123/data') {  // ← CHANGE TO YOUR UNIQUE ID
@@ -42,23 +44,15 @@ function App() {
     };
   }, []);
 
-  const sendControl = async (state) => {
-    try {
-      const response = await fetch('/api/control', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ state }),
-      });
-      if (response.ok) {
-        alert(`Turned ${state} successfully!`);
-      } else {
-        alert('Control failed - check if device is online');
-      }
-    } catch (error) {
-      alert('Control API not available yet (normal on first load)');
-      console.error('Control error:', error);
-    }
-  };
+   const sendControl = (state) => {
+  if (mqttClient && mqttClient.connected) {
+    mqttClient.publish('homeauto/tisha123/control', state, { qos: 1 });
+    setConnectionStatus(`Sent ${state} command!`);
+    setTimeout(() => setConnectionStatus('Live data received!'), 2000);
+  } else {
+    setConnectionStatus('MQTT not connected yet - wait for data');
+  }
+};
 
   return (
     <div style={{ textAlign: 'center', marginTop: '50px', fontFamily: 'Arial' }}>
