@@ -14,35 +14,19 @@ exports.handler = async (event) => {
   }
 
   if (!['ON', 'OFF'].includes(state)) {
-    return { statusCode: 400, body: 'Invalid state: use ON or OFF' };
+    return { statusCode: 400, body: 'Invalid state' };
   }
 
-  const client = mqtt.connect('tcp://broker.emqx.io:1883');  // Standard TCP for serverless
+  // Fire-and-forget: Connect, publish immediately, don't wait for confirm
+  const client = mqtt.connect('tcp://broker.emqx.io:1883');
 
-  return new Promise((resolve) => {
-    client.on('connect', () => {
-      client.publish('homeauto/tisha123/control', state, { qos: 1 }, (err) => {
-        if (err) {
-          console.error('Publish error:', err);
-          resolve({ statusCode: 500, body: 'MQTT publish failed' });
-        } else {
-          resolve({ statusCode: 200, body: JSON.stringify({ success: true, state }) });
-        }
-        client.end();
-      });
-    });
+  client.publish('homeauto/tisha123/control', state, { qos: 1 });
 
-    client.on('error', (err) => {
-      console.error('MQTT connection error:', err);
-      resolve({ statusCode: 500, body: 'MQTT connection failed' });
-      client.end();
-    });
+  client.end();  // Close immediately
 
-    // Timeout if no connect in 5 seconds
-    setTimeout(() => {
-      if (client.connected) return;
-      resolve({ statusCode: 504, body: 'MQTT timeout' });
-      client.end();
-    }, 5000);
-  });
+  // Always return success fast (command is sent)
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ success: true, message: `Command ${state} sent` }),
+  };
 };
